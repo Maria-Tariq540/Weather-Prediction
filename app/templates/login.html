@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Weather Prediction{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-container">
+            <div class="auth-card glass-card">
+                <div class="auth-header">
+                    <h2>Welcome Back</h2>
+                    <p>Login to access your weather dashboard</p>
+                </div>
+
+                <form id="login-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="username">
+                            <i class="fas fa-user"></i> Username or Email
+                        </label>
+                        <input type="text" id="username" name="username" required
+                            placeholder="Enter your username or email">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        <input type="password" id="password" name="password" required placeholder="Enter your password">
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="remember">
+                            <span>Remember me</span>
+                        </label>
+                        <a href="#" class="link">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </form>
+
+                <div class="auth-footer">
+                    <p>Don't have an account? <a href="/signup" class="link">Sign up</a></p>
+                </div>
+            </div>
+
+            <div class="auth-illustration">
+                <div class="illustration-content">
+                    <i class="fas fa-cloud-sun fa-5x"></i>
+                    <h3>Smart Weather Predictions</h3>
+                    <p>Access personalized weather forecasts and save your favorite cities</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        showLoading();
+
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            hideLoading();
+
+            if (data.success) {
+                showToast('Login successful!', 'success');
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 1000);
+            } else {
+                showToast(data.error || 'Login failed', 'error');
+            }
+        } catch (error) {
+            hideLoading();
+            showToast('An error occurred. Please try again.', 'error');
+        }
+    });
+</script>
+{% endblock %}
