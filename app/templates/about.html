@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}About Us - Weather Prediction{% endblock %}
+
+{% block content %}
+<section class="hero" style="padding: 4rem 0; min-height: 40vh; display: flex; align-items: center;">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="gradient-text">About WeatherML</span>
+            </h1>
+            <p class="hero-subtitle">
+                Revolutionizing weather forecasting through Artificial Intelligence and real-time data science.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="about-section" style="padding: 6rem 0;">
+    <div class="container">
+        <div class="about-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
+            <div class="about-text">
+                <h2 style="font-size: 2.5rem; margin-bottom: 2rem;">Our Mission</h2>
+                <p style="font-size: 1.125rem; margin-bottom: 2rem; color: var(--text-secondary);">
+                    WeatherML was founded on the principle that accurate weather data should be accessible,
+                    understandable, and personalized. We combine the power of traditional meteorological models
+                    with cutting-edge Machine Learning algorithms to provide forecasts that adapt to local patterns.
+                </p>
+                <div class="stats-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem;">
+                    <div class="stat-card glass-card">
+                        <div class="stat-value" style="color: var(--primary-color);">95%+</div>
+                        <div class="stat-label">Model Accuracy</div>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <div class="stat-value" style="color: var(--primary-color);">200k+</div>
+                        <div class="stat-label">Cities Supported</div>
+                    </div>
+                </div>
+            </div>
+            <div class="about-image">
+                <div class="glass-card" style="padding: 1rem; border-radius: 2rem; overflow: hidden;">
+                    <img src="https://images.unsplash.com/photo-1592210454359-9043f067919b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+                        alt="Weather Visualization"
+                        style="width: 100%; height: auto; border-radius: 1.5rem; display: block;">
+                </div>
+            </div>
+        </div>
+
+        <div class="tech-showcase" style="margin-top: 8rem; text-align: center;">
+            <h2 style="font-size: 2.5rem; margin-bottom: 4rem;">Powered by Modern Technology</h2>
+            <div class="features-grid">
+                <div class="feature-card glass-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Advanced ML</h3>
+                    <p>Using Random Forest and LSTM models to analyze historical patterns and predict future conditions.
+                    </p>
+                </div>
+                <div class="feature-card glass-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Real-time Sync</h3>
+                    <p>Direct integration with OpenWeatherMap API for sub-second updates on current conditions.</p>
+                </div>
+                <div class="feature-card glass-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Interactive Data</h3>
+                    <p>Beautiful visualizations powered by Chart.js to help you understand trends at a glance.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section" style="padding: 6rem 0; background: var(--bg-tertiary); text-align: center;">
+    <div class="container">
+        <h2 style="font-size: 2.5rem; margin-bottom: 1.5rem;">Join the Future of Weather</h2>
+        <p
+            style="margin-bottom: 3rem; color: var(--text-secondary); max-width: 600px; margin-left: auto; margin-right: auto;">
+            Start managing your favorite cities and get personalized weather alerts today.
+        </p>
+        <div style="display: flex; gap: 1.5rem; justify-content: center;">
+            <a href="/signup" class="btn btn-primary btn-lg">Get Started Free</a>
+            <a href="/login" class="btn btn-secondary btn-lg">Member Login</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

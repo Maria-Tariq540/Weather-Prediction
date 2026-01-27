@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block title %}Weather Prediction - Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="gradient-text">Smart Weather Predictions</span>
+                <br>Powered by Machine Learning
+            </h1>
+            <p class="hero-subtitle">
+                Get accurate 7-day weather forecasts using advanced AI models.
+                Real-time data, air quality monitoring, and personalized alerts.
+            </p>
+            
+            <!-- City Search -->
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input 
+                        type="text" 
+                        id="city-search" 
+                        placeholder="Search for a city..."
+                        autocomplete="off"
+                    >
+                    <button class="btn btn-primary" id="search-btn">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+                <div class="search-suggestions" id="search-suggestions"></div>
+            </div>
+            
+            <div class="hero-features">
+                <div class="feature-badge">
+                    <i class="fas fa-brain"></i>
+                    <span>AI Powered</span>
+                </div>
+                <div class="feature-badge">
+                    <i class="fas fa-bolt"></i>
+                    <span>Real-time Data</span>
+                </div>
+                <div class="feature-badge">
+                    <i class="fas fa-bell"></i>
+                    <span>Smart Alerts</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Animated Background -->
+    <div class="hero-background">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+    </div>
+</section>
+
+<!-- Weather Display Section -->
+<section class="weather-section" id="weather-display" style="display: none;">
+    <div class="container">
+        <!-- Current Weather Card -->
+        <div class="current-weather-card glass-card">
+            <div class="weather-header">
+                <div>
+                    <h2 id="current-city">Loading...</h2>
+                    <p id="current-date"></p>
+                </div>
+                <button class="btn-icon" id="add-favorite-btn" title="Add to favorites">
+                    <i class="far fa-heart"></i>
+                </button>
+            </div>
+            
+            <div class="weather-main">
+                <div class="weather-icon-large">
+                    <img id="weather-icon" src="" alt="Weather icon">
+                </div>
+                <div class="weather-temp">
+                    <span class="temp-value" id="current-temp">--</span>
+                    <span class="temp-unit">°C</span>
+                </div>
+                <div class="weather-description">
+                    <p id="weather-desc">--</p>
+                    <p class="feels-like">Feels like <span id="feels-like">--</span>°C</p>
+                </div>
+            </div>
+            
+            <div class="weather-details">
+                <div class="detail-item">
+                    <i class="fas fa-tint"></i>
+                    <div>
+                        <span class="detail-label">Humidity</span>
+                        <span class="detail-value" id="humidity">--%</span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-wind"></i>
+                    <div>
+                        <span class="detail-label">Wind Speed</span>
+                        <span class="detail-value" id="wind-speed">-- m/s</span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-eye"></i>
+                    <div>
+                        <span class="detail-label">Visibility</span>
+                        <span class="detail-value" id="visibility">-- km</span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-compress-arrows-alt"></i>
+                    <div>
+                        <span class="detail-label">Pressure</span>
+                        <span class="detail-value" id="pressure">-- hPa</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Air Quality Index -->
+        <div class="aqi-card glass-card" id="aqi-card">
+            <h3><i class="fas fa-lungs"></i> Air Quality Index</h3>
+            <div class="aqi-display">
+                <div class="aqi-value" id="aqi-value">--</div>
+                <div class="aqi-category" id="aqi-category">Loading...</div>
+            </div>
+            <div class="aqi-bar">
+                <div class="aqi-indicator" id="aqi-indicator"></div>
+            </div>
+        </div>
+        
+        <!-- Weather Alerts -->
+        <div class="alerts-section" id="alerts-section" style="display: none;">
+            <h3><i class="fas fa-exclamation-triangle"></i> Weather Alerts</h3>
+            <div class="alerts-container" id="alerts-container"></div>
+        </div>
+        
+        <!-- Forecast Tabs -->
+        <div class="forecast-tabs">
+            <button class="tab-btn active" data-tab="api-forecast">
+                <i class="fas fa-cloud"></i> API Forecast
+            </button>
+            <button class="tab-btn" data-tab="ml-forecast">
+                <i class="fas fa-brain"></i> ML Prediction
+            </button>
+            <button class="tab-btn" data-tab="charts">
+                <i class="fas fa-chart-line"></i> Charts
+            </button>
+            <button class="tab-btn" data-tab="map">
+                <i class="fas fa-map"></i> Map
+            </button>
+        </div>
+        
+        <!-- API Forecast Tab -->
+        <div class="tab-content active" id="api-forecast">
+            <h3>7-Day Forecast</h3>
+            <div class="forecast-grid" id="forecast-grid"></div>
+        </div>
+        
+        <!-- ML Forecast Tab -->
+        <div class="tab-content" id="ml-forecast">
+            <h3>Machine Learning Prediction</h3>
+            <div class="ml-info">
+                <p>Our AI models analyze historical patterns to predict future weather conditions.</p>
+                <div class="model-selector">
+                    <label>Model:</label>
+                    <select id="model-select">
+                        <option value="random_forest">Random Forest (Recommended)</option>
+                        <option value="linear_regression">Linear Regression</option>
+                    </select>
+                    <button class="btn btn-secondary btn-sm" id="load-ml-btn">
+                        <i class="fas fa-sync"></i> Load Prediction
+                    </button>
+                </div>
+            </div>
+            <div class="forecast-grid" id="ml-forecast-grid"></div>
+            <div class="model-metrics" id="model-metrics"></div>
+        </div>
+        
+        <!-- Charts Tab -->
+        <div class="tab-content" id="charts">
+            <h3>Weather Trends</h3>
+            <div class="charts-grid">
+                <div class="chart-container glass-card">
+                    <h4>Temperature Forecast</h4>
+                    <canvas id="temp-chart"></canvas>
+                </div>
+                <div class="chart-container glass-card">
+                    <h4>Humidity & Rainfall</h4>
+                    <canvas id="humidity-chart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Map Tab -->
+        <div class="tab-content" id="map">
+            <h3>Location Map</h3>
+            <div id="weather-map" class="weather-map"></div>
+        </div>
+        
+        <!-- Recommendations -->
+        <div class="recommendations-card glass-card" id="recommendations-card">
+            <h3><i class="fas fa-lightbulb"></i> Recommendations</h3>
+            <div class="recommendations-grid" id="recommendations-grid"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section" id="features">
+    <div class="container">
+        <h2 class="section-title">Powerful Features</h2>
+        <p class="section-subtitle">Everything you need for accurate weather predictions</p>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3>ML Predictions</h3>
+                <p>Advanced machine learning models trained on historical data for accurate 7-day forecasts.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3>Real-time Data</h3>
+                <p>Live weather updates from OpenWeatherMap API with automatic caching for performance.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-lungs"></i>
+                </div>
+                <h3>Air Quality</h3>
+                <p>Monitor air quality index (AQI) and pollutant levels for health-conscious decisions.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <h3>Smart Alerts</h3>
+                <p>Intelligent weather alerts for extreme conditions like storms, heat waves, and more.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Interactive Charts</h3>
+                <p>Beautiful visualizations of temperature, humidity, and rainfall trends.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <h3>Favorites</h3>
+                <p>Save your favorite cities for quick access to weather information.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="about-section" id="about">
+    <div class="container">
+        <div class="about-content">
+            <div class="about-text">
+                <h2>About WeatherML</h2>
+                <p>
+                    WeatherML combines real-time weather data with advanced machine learning 
+                    to provide the most accurate weather predictions. Our models are trained 
+                    on extensive historical data and continuously improved for better accuracy.
+                </p>
+                <p>
+                    Built with Flask, scikit-learn, and modern web technologies, this application 
+                    demonstrates the power of AI in weather forecasting. Perfect for developers, 
+                    data scientists, and weather enthusiasts.
+                </p>
+                <div class="tech-stack">
+                    <span class="tech-badge">Python</span>
+                    <span class="tech-badge">Flask</span>
+                    <span class="tech-badge">scikit-learn</span>
+                    <span class="tech-badge">Chart.js</span>
+                    <span class="tech-badge">OpenWeatherMap API</span>
+                </div>
+            </div>
+            <div class="about-image">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">95%</div>
+                        <div class="stat-label">Accuracy</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">7</div>
+                        <div class="stat-label">Days Forecast</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">24/7</div>
+                        <div class="stat-label">Real-time Updates</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">2</div>
+                        <div class="stat-label">ML Models</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/weather.js') }}"></script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% endblock %}

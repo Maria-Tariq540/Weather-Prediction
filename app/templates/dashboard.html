@@ -1,0 +1,376 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Weather Prediction{% endblock %}
+
+{% block content %}
+<section class="dashboard-section">
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Weather Dashboard</h1>
+            <p>Manage your favorite cities and view personalized forecasts</p>
+        </div>
+
+        <!-- Favorite Cities -->
+        <div class="favorites-section">
+            <div class="section-header">
+                <h2><i class="fas fa-heart"></i> Favorite Cities</h2>
+                <button class="btn btn-primary btn-sm" id="add-city-btn">
+                    <i class="fas fa-plus"></i> Add City
+                </button>
+            </div>
+
+            <div class="favorites-grid" id="favorites-grid">
+                <div class="loading-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading your favorite cities...</p>
+                </div>
+            </div>
+
+            <div class="empty-state" id="empty-favorites" style="display: none;">
+                <i class="fas fa-heart-broken fa-3x"></i>
+                <h3>No Favorite Cities Yet</h3>
+                <p>Add cities to quickly access their weather information</p>
+                <button class="btn btn-primary" id="add-first-city-btn">
+                    <i class="fas fa-plus"></i> Add Your First City
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="stats-section">
+            <h2>Your Weather Stats</h2>
+            <div class="stats-grid">
+                <div class="stat-card glass-card">
+                    <i class="fas fa-city"></i>
+                    <div class="stat-value" id="total-cities">0</div>
+                    <div class="stat-label">Favorite Cities</div>
+                </div>
+                <div class="stat-card glass-card">
+                    <i class="fas fa-bell"></i>
+                    <div class="stat-value" id="active-alerts">0</div>
+                    <div class="stat-label">Active Alerts</div>
+                </div>
+                <div class="stat-card glass-card">
+                    <i class="fas fa-calendar"></i>
+                    <div class="stat-value" id="days-member">0</div>
+                    <div class="stat-label">Days as Member</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Add City Modal -->
+<div class="modal" id="add-city-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add Favorite City</h3>
+            <button class="modal-close" id="close-modal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="modal-city-search" placeholder="Search for a city..." autocomplete="off">
+                <button class="btn btn-primary" id="modal-search-btn">
+                    <i class="fas fa-plus"></i> Add
+                </button>
+            </div>
+            <div class="search-suggestions" id="modal-suggestions"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // currentUser is already declared in main.js
+
+
+    // Check authentication
+    async function checkAuth() {
+        try {
+            const response = await fetch('/api/auth/check');
+            const data = await response.json();
+
+            if (!data.authenticated) {
+                window.location.href = '/login';
+                return false;
+            }
+
+            currentUser = data.user;
+            updateUserStats();
+            return true;
+        } catch (error) {
+            console.error('Auth check failed:', error);
+            window.location.href = '/login';
+            return false;
+        }
+    }
+
+    // Load favorite cities
+    async function loadFavorites() {
+        try {
+            const response = await fetch('/api/favorites/');
+
+            const data = await response.json();
+
+            if (data.success) {
+                displayFavorites(data.favorites);
+            }
+        } catch (error) {
+            console.error('Failed to load favorites:', error);
+        }
+    }
+
+    // Display favorites
+    function displayFavorites(favorites) {
+        const grid = document.getElementById('favorites-grid');
+        const emptyState = document.getElementById('empty-favorites');
+
+        if (favorites.length === 0) {
+            grid.style.display = 'none';
+            emptyState.style.display = 'flex';
+            return;
+        }
+
+        grid.style.display = 'grid';
+        emptyState.style.display = 'none';
+        grid.innerHTML = '';
+
+        favorites.forEach(fav => {
+            loadCityWeather(fav);
+        });
+    }
+
+    // Load weather for a favorite city
+    async function loadCityWeather(favorite) {
+        const grid = document.getElementById('favorites-grid');
+
+        const card = document.createElement('div');
+        card.className = 'favorite-card glass-card';
+        card.innerHTML = `
+        <div class="favorite-header">
+            <h3>${favorite.city_name}</h3>
+            <button class="btn-icon remove-favorite" data-id="${favorite.id}">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        <div class="favorite-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+        </div>
+    `;
+
+        grid.appendChild(card);
+
+        try {
+            const response = await fetch(`/api/weather/current/${favorite.city_name}`);
+            const data = await response.json();
+
+            if (data.success) {
+                card.innerHTML = `
+                <div class="favorite-header">
+                    <h3>${favorite.city_name}, ${favorite.country}</h3>
+                    <button class="btn-icon remove-favorite" data-id="${favorite.id}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="favorite-weather">
+                    <div class="weather-icon-small">
+                        <i class="fas fa-${getWeatherIcon(data.data.weather.main)}"></i>
+                    </div>
+                    <div class="temp-large">${data.data.temperature}°C</div>
+                    <div class="weather-desc">${data.data.weather.description}</div>
+                </div>
+                <div class="favorite-details">
+                    <span><i class="fas fa-tint"></i> ${data.data.humidity}%</span>
+                    <span><i class="fas fa-wind"></i> ${data.data.wind_speed} m/s</span>
+                </div>
+                <a href="/?city=${favorite.city_name}" class="btn btn-secondary btn-sm btn-block">
+                    View Details
+                </a>
+            `;
+
+                // Re-attach event listener
+                card.querySelector('.remove-favorite').addEventListener('click', removeFavorite);
+            }
+        } catch (error) {
+            console.error('Failed to load weather:', error);
+        }
+    }
+
+    // Remove favorite
+    async function removeFavorite(e) {
+        const id = e.currentTarget.dataset.id;
+
+        if (!confirm('Remove this city from favorites?')) return;
+
+        try {
+            const response = await fetch(`/api/favorites/${id}`, {
+                method: 'DELETE'
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showToast('City removed from favorites', 'success');
+                loadFavorites();
+            }
+        } catch (error) {
+            showToast('Failed to remove city', 'error');
+        }
+    }
+
+    // Update user stats
+    function updateUserStats() {
+        if (currentUser) {
+            document.getElementById('total-cities').textContent = currentUser.favorite_cities_count || 0;
+
+            const createdDate = new Date(currentUser.created_at);
+            const daysMember = Math.floor((new Date() - createdDate) / (1000 * 60 * 60 * 24));
+            document.getElementById('days-member').textContent = daysMember;
+        }
+    }
+
+    // Get weather icon
+    function getWeatherIcon(weather) {
+        const icons = {
+            'Clear': 'sun',
+            'Clouds': 'cloud',
+            'Rain': 'cloud-rain',
+            'Drizzle': 'cloud-rain',
+            'Thunderstorm': 'bolt',
+            'Snow': 'snowflake',
+            'Mist': 'smog',
+            'Fog': 'smog'
+        };
+        return icons[weather] || 'cloud';
+    }
+
+    // Initialize
+    checkAuth().then(authenticated => {
+        if (authenticated) {
+            loadFavorites();
+        }
+    });
+
+    // Modal functionality
+    const addCityBtn = document.getElementById('add-city-btn');
+    const addFirstCityBtn = document.getElementById('add-first-city-btn');
+    const modal = document.getElementById('add-city-modal');
+    const closeModal = document.getElementById('close-modal');
+
+    const openModalFunc = () => {
+        modal.classList.add('active');
+        document.getElementById('modal-city-search').focus();
+    };
+
+    if (addCityBtn) addCityBtn.addEventListener('click', openModalFunc);
+    if (addFirstCityBtn) addFirstCityBtn.addEventListener('click', openModalFunc);
+
+    if (closeModal) {
+        closeModal.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+    }
+
+    // Modal search suggestions
+    const modalSearch = document.getElementById('modal-city-search');
+    const modalSuggestions = document.getElementById('modal-suggestions');
+    let modalSearchTimeout = null;
+
+    if (modalSearch) {
+        // Handle input for suggestions
+        modalSearch.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            clearTimeout(modalSearchTimeout);
+            if (query.length < 2) {
+                modalSuggestions.classList.remove('active');
+                return;
+            }
+            modalSearchTimeout = setTimeout(async () => {
+                try {
+                    const response = await fetch(`/api/weather/search/${encodeURIComponent(query)}/`);
+                    const data = await response.json();
+                    if (data.success && data.data.length > 0) {
+                        displayModalSuggestions(data.data);
+                    }
+                } catch (error) {
+                    console.error('Modal search failed:', error);
+                }
+            }, 300);
+        });
+
+        // Handle Enter key
+        modalSearch.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const query = modalSearch.value.trim();
+                if (query) addCityToFavorites(query);
+            }
+        });
+    }
+
+    // Modal search button click
+    const modalSearchBtn = document.getElementById('modal-search-btn');
+    if (modalSearchBtn) {
+        modalSearchBtn.addEventListener('click', () => {
+            const query = modalSearch.value.trim();
+            if (query) addCityToFavorites(query);
+        });
+    }
+
+    async function addCityToFavorites(cityName) {
+        try {
+            const response = await fetch('/api/favorites/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ city_name: cityName })
+            });
+            const data = await response.json();
+            if (data.success) {
+                showToast('City added!', 'success');
+                if (modal) modal.classList.remove('active');
+                if (modalSearch) modalSearch.value = '';
+                if (modalSuggestions) modalSuggestions.classList.remove('active');
+                loadFavorites();
+            } else {
+                showToast(data.error || 'Failed to add city', 'error');
+            }
+        } catch (error) {
+            showToast('Failed to add city', 'error');
+        }
+    }
+
+    function displayModalSuggestions(cities) {
+        modalSuggestions.innerHTML = '';
+        cities.forEach(city => {
+            const item = document.createElement('div');
+            item.className = 'suggestion-item';
+            item.innerHTML = `<strong>${city.name}</strong>, ${city.country}`;
+            item.addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/api/favorites/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ city_name: city.name })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        showToast('City added!', 'success');
+                        modal.classList.remove('active');
+                        loadFavorites();
+                    } else {
+                        showToast(data.error, 'error');
+                    }
+                } catch (error) {
+                    showToast('Failed to add city', 'error');
+                }
+            });
+            modalSuggestions.appendChild(item);
+        });
+        modalSuggestions.classList.add('active');
+    }
+
+</script>
+{% endblock %}

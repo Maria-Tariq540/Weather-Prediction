@@ -1,0 +1,27 @@
+# Minimal requirements for running the app without ML training
+# Use this if you have issues installing pandas/numpy
+
+# Flask Framework
+Flask==3.0.0
+Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
+Flask-CORS==4.0.0
+Flask-Session==0.5.0
+
+# Database
+SQLAlchemy==2.0.23
+
+# HTTP Requests
+requests==2.31.0
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# Password Hashing
+Werkzeug==3.0.1
+
+# Date/Time
+python-dateutil==2.8.2
+
+# Validation
+email-validator==2.1.0

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - Weather Prediction{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-container">
+            <div class="auth-card glass-card">
+                <div class="auth-header">
+                    <h2>Create Account</h2>
+                    <p>Join us to get personalized weather predictions</p>
+                </div>
+
+                <form id="signup-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="username">
+                            <i class="fas fa-user"></i> Username
+                        </label>
+                        <input type="text" id="username" name="username" required minlength="3"
+                            placeholder="Choose a username">
+                        <small class="form-hint">At least 3 characters</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">
+                            <i class="fas fa-envelope"></i> Email
+                        </label>
+                        <input type="email" id="email" name="email" required placeholder="Enter your email">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        <input type="password" id="password" name="password" required minlength="6"
+                            placeholder="Create a password">
+                        <small class="form-hint">At least 6 characters</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm-password">
+                            <i class="fas fa-lock"></i> Confirm Password
+                        </label>
+                        <input type="password" id="confirm-password" name="confirm-password" required
+                            placeholder="Confirm your password">
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="terms" required>
+                            <span>I agree to the <a href="#" class="link">Terms of Service</a></span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </button>
+                </form>
+
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="/login" class="link">Login</a></p>
+                </div>
+            </div>
+
+            <div class="auth-illustration">
+                <div class="illustration-content">
+                    <i class="fas fa-brain fa-5x"></i>
+                    <h3>AI-Powered Forecasts</h3>
+                    <p>Get accurate predictions using machine learning models</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+
+        // Validate passwords match
+        if (password !== confirmPassword) {
+            showToast('Passwords do not match', 'error');
+            return;
+        }
+
+        showLoading();
+
+        try {
+            const response = await fetch('/api/auth/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, email, password })
+            });
+
+            const data = await response.json();
+
+            hideLoading();
+
+            if (data.success) {
+                showToast('Account created successfully!', 'success');
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 1000);
+            } else {
+                showToast(data.error || 'Signup failed', 'error');
+            }
+        } catch (error) {
+            hideLoading();
+            showToast('An error occurred. Please try again.', 'error');
+        }
+    });
+</script>
+{% endblock %}
