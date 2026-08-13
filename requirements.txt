@@ -1,37 +1,6 @@
-# Flask Framework
-Flask==3.0.0
-Flask-SQLAlchemy==3.1.1
-Flask-Login==0.6.3
-Flask-CORS==4.0.0
-Flask-Session==0.5.0
-
-# Database
-SQLAlchemy==2.0.23
-
-# HTTP Requests
+Flask==3.0.2
+gunicorn==21.2.0
 requests==2.31.0
-
-# Environment Variables
-python-dotenv==1.0.0
-
-# Password Hashing
-Werkzeug==3.0.1
-
-# Data Processing
-pandas==2.1.4
-numpy==1.26.2
-
-# Machine Learning
-scikit-learn==1.3.2
-joblib==1.3.2
-
-# Date/Time
-python-dateutil==2.8.2
-
-# Validation
-email-validator==2.1.0
-
-# Optional: Deep Learning (for LSTM model)
-# tensorflow==2.15.0
-# or
-# torch==2.1.2
+pandas==2.2.1
+numpy==1.26.4
+scikit-learn==1.4.1.post1
